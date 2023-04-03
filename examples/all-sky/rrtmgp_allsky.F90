@@ -102,7 +102,7 @@ program rte_rrtmgp_clouds
   !
   logical :: top_at_1, is_sw, is_lw
 
-  integer  :: ncol, nlay, nbnd, ngpt
+  integer  :: ncol, mlay, nlay, nbnd, ngpt
   integer  :: icol, ilay, ibnd, iloop, igas
   real(wp) :: rel_val, rei_val
 
@@ -110,6 +110,7 @@ program rte_rrtmgp_clouds
   integer  :: nUserArgs=0, nloops
   logical :: use_luts = .true., write_fluxes = .true.
   integer, parameter :: ngas = 8
+  character(len=3) :: gas_name
   character(len=3), dimension(ngas) &
                      :: gas_names = ['h2o', 'co2', 'o3 ', 'n2o', 'co ', 'ch4', 'o2 ', 'n2 ']
 
@@ -159,10 +160,12 @@ program rte_rrtmgp_clouds
                   gas_concs_garand, col_dry)
   deallocate(col_dry)
   nlay = size(p_lay, 2)
+  mlay = size(p_lay, 1)
   ! For clouds we'll use the first column, repeated over and over
   call stop_on_err(gas_concs%init(gas_names))
   do igas = 1, ngas
-    call vmr_2d_to_1d(gas_concs, gas_concs_garand, gas_names(igas), size(p_lay, 1), nlay)
+    gas_name=gas_names(igas)
+    call vmr_2d_to_1d(gas_concs, gas_concs_garand, gas_name, mlay, nlay)
   end do
   !  If we trusted in Fortran allocate-on-assign we could skip the temp_array here
   allocate(temp_array(ncol, nlay))
